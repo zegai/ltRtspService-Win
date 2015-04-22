@@ -177,8 +177,73 @@ bool MediaSession::IsPlay()
 	
 }
 
-MediaSession::~MediaSession()
+uint64_t MediaSession::GetSessionID()const
 {
-
+	return sessionid;
 }
 
+MediaSession::~MediaSession()
+{
+	
+}
+
+
+MediaSessionList* MediaSessionList::GetInstance()
+{
+	static MediaSessionList* slist = NULL;
+	if (slist)
+	{
+		slist = new MediaSessionList;
+		return slist;
+	}
+	return slist;
+}
+
+bool MediaSessionList::SessionInsert(MediaSession* Session)
+{
+	assert(Session);
+	pair<map<uint64_t, MediaSession*>::iterator, bool> itinsert;
+	do 
+	{
+		Session->sessionid = MediaSession::GenSessionID();
+		itinsert = SessionList.insert(pair<uint64_t, MediaSession *>(Session->sessionid, Session));
+	} while (!itinsert.second);
+	
+	return true;
+}
+
+MediaSession* MediaSessionList::SessionGet(uint64_t SessionID)
+{
+	MediaSession* ret = SessionList[SessionID];
+	if (!ret->IsFullInit)
+	{
+		SessionList.erase(SessionID);
+		delete ret;
+		return NULL;
+	}
+	return ret;
+	
+}
+
+bool MediaSessionList::SessionDel(uint64_t SessionID)
+{
+	MediaSession* getsession = SessionGet(SessionID);
+	if (getsession)
+	{
+		delete getsession;
+		return true;
+	}
+	return false;
+	
+	
+}
+
+MediaSessionList::~MediaSessionList()
+{
+	map<uint64_t, MediaSession*>::iterator it = SessionList.begin();
+	while (it != SessionList.end())
+	{
+		delete it->second;
+		it ++;
+	}
+}

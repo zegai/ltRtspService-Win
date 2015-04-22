@@ -110,7 +110,7 @@ void Network::Listen_Cb(evconnlistener *listen, evutil_socket_t fd,
     }
 
 	MediaSession* session = new MediaSession(net);
-
+	MediaSessionList::GetInstance()->SessionInsert(session);
     bufferevent_setcb(bev, net->readcb, net->writecb, Event_Cb, session);
     bufferevent_enable(bev, EV_READ | EV_WRITE);
 
@@ -130,8 +130,8 @@ Network::Event_Cb(struct bufferevent *bev, short events, void *user_data)
      * timeouts */
     bufferevent_free(bev);
 	//回收当前MediaSession会话信息资源
-    //MediaSession * ses = (MediaSession *)user_data;
-    //MediaSessionList::GetInstance()->RemoveSession(ses->GetSessionID());
+    MediaSession * ses = (MediaSession *)user_data;
+    MediaSessionList::GetInstance()->SessionDel(ses->GetSessionID());
 }
 
 //void

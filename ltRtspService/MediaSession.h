@@ -15,11 +15,15 @@ public:
 	
     static void Send(struct bufferevent*, void *arg);
     static void Recv(struct bufferevent*, void *arg);
+	static long long GenSessionID();
+
+	uint64_t GetSessionID()const;
 
     void DealRtsp(struct bufferevent* bev);
 	void SetDescribe();
-    static long long GenSessionID();
-	explicit MediaSession(Network *pwork):work(pwork){};
+
+	explicit MediaSession(Network *pwork):work(pwork),IsFullInit(true){};
+	MediaSession():IsFullInit(false){};
 	friend class MediaSessionList;
 	DWORD tick;
 	bool IsPlay();
@@ -33,6 +37,7 @@ private:
 	media_stream_ptr streamobj;
 	MediaType type;
 	rtsp_type stype;
+	bool IsFullInit;
 	
 };
 
@@ -43,10 +48,12 @@ class MediaSessionList
 {
 public:
 	static MediaSessionList* GetInstance();
+	bool SessionInsert(MediaSession* Session);
+	bool SessionDel(uint64_t SessionID);
+	MediaSession* SessionGet(uint64_t SessionID);
 protected:
-	bool SessionInsert();
-	bool SessionDel();
-	bool SessionGet();
+	//CRITICAL_SECTION ListLock; ≤Â»Î…æ≥˝À¯
 	MediaSessionList();
 	~MediaSessionList();
+	map<uint64_t,  MediaSession*> SessionList;
 };
