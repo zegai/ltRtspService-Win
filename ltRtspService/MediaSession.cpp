@@ -34,9 +34,8 @@ MediaSession::SetDescribe()
 {
 	unsigned p = 0;
 	char SessionId[48] = {0};
-	sessionid = GenSessionID();
-    _snprintf_s(SessionId, 48, "%I64u", sessionid);
-    printf("\nValue Of Session: %I64u\n", sessionid);
+    _snprintf_s(SessionId, 48, "%I64u", info.sessionid);
+    printf("\nValue Of Session: %I64u\n", info.sessionid);
 	//Ìæ»»
 	while ((p = rtspinc.find("sessionforreplace")) != std::string::npos)
 	{
@@ -87,9 +86,9 @@ MediaSession::DealRtsp(struct bufferevent* bev)
         rtspinc.append(pstring);
         if ( rtspinc.find("\r\n\r\n") != std::string::npos )
         {
-            printf("IN<<\n%s\n", rtspinc.c_str());
-			stype = rs.deal_requset(rtspinc).type;
-            if(stype == DESCRIBE)
+            //printf("IN<<\n%s\n", rtspinc.c_str());
+			info.stype = rs.deal_requset(rtspinc).type;
+            if(info.stype == DESCRIBE)
             {
                 SetDescribe();
                 int p = rtspinc.find("\r\n\r\n");
@@ -98,9 +97,9 @@ MediaSession::DealRtsp(struct bufferevent* bev)
                 bufferevent_write( bev, rtspinc.c_str() + (p + 4), (rtspinc.size() - p - 4));
                 //bufferevent_write( bev, "\r\n", 2);
             }
-			else if (stype == SETUP)
+			else if (info.stype == SETUP)
 			{
-				streamobj = MediaStreamBuild::CreateNew(".h264", type);
+				streamobj = MediaStreamBuild::CreateNew(".h264", info.type);
 				streamobj->filename = "\\test.h264";
 				streamobj->fileindex =  HardwareIO::GetInstance()->MakeFileNode(streamobj->filename);
 				buf_share_ptr filebuf = HardwareIO::GetInstance()->GetBufferFormFile(streamobj->fileindex, streamobj->filepos, 10240);
@@ -109,7 +108,7 @@ MediaSession::DealRtsp(struct bufferevent* bev)
 				bufferevent_write( bev, "\r\n", 2);
 			}
 			
-            else if(stype == PLAY)
+            else if(info.stype == PLAY)
 			{
 				buf_share_ptr pt = RtpOverTcp::TCPForH264(streamobj);
 				while (pt->GetMtuValue() <= 0)
@@ -128,7 +127,7 @@ MediaSession::DealRtsp(struct bufferevent* bev)
                 bufferevent_write( bev, rtspinc.c_str(), rtspinc.size() );
                 bufferevent_write( bev, "\r\n", 2);
             }
-            printf("OUT>>\n%s\n", rtspinc.c_str());
+            //printf("OUT>>\n%s\n", rtspinc.c_str());
             rtspinc.clear();
         }
     }
@@ -169,7 +168,7 @@ MediaSession::Send(struct bufferevent* bev, void *arg)
 }
 bool MediaSession::IsPlay()
 {
-	if (stype == PLAY)
+	if (info.stype == PLAY)
 	{
 		return true;
 	}
@@ -179,19 +178,22 @@ bool MediaSession::IsPlay()
 
 uint64_t MediaSession::GetSessionID()const
 {
-	return sessionid;
+	return info.sessionid;
 }
 
 MediaSession::~MediaSession()
 {
 	
 }
+MediaSessionList::MediaSessionList()
+{
 
+}
 
 MediaSessionList* MediaSessionList::GetInstance()
 {
 	static MediaSessionList* slist = NULL;
-	if (slist)
+	if (slist == NULL)
 	{
 		slist = new MediaSessionList;
 		return slist;
@@ -203,11 +205,16 @@ bool MediaSessionList::SessionInsert(MediaSession* Session)
 {
 	assert(Session);
 	pair<map<uint64_t, MediaSession*>::iterator, bool> itinsert;
-	do 
+	Session->info.sessionid = MediaSession::GenSessionID();
+	itinsert = SessionList.insert(pair<uint64_t, MediaSession *>(Session->info.sessionid, Session));
+	printf("Insert Session: %I64u\n", Session->info.sessionid);
+	/*while (!itinsert.second)
 	{
 		Session->sessionid = MediaSession::GenSessionID();
 		itinsert = SessionList.insert(pair<uint64_t, MediaSession *>(Session->sessionid, Session));
-	} while (!itinsert.second);
+		printf("Insert Session: %I64u\n", Session->sessionid);
+	}*/
+
 	
 	return true;
 }
@@ -215,6 +222,7 @@ bool MediaSessionList::SessionInsert(MediaSession* Session)
 MediaSession* MediaSessionList::SessionGet(uint64_t SessionID)
 {
 	MediaSession* ret = SessionList[SessionID];
+	printf("Del Session: %I64u\n", SessionID);
 	if (!ret->IsFullInit)
 	{
 		SessionList.erase(SessionID);

@@ -111,6 +111,7 @@ void Network::Listen_Cb(evconnlistener *listen, evutil_socket_t fd,
 
 	MediaSession* session = new MediaSession(net);
 	MediaSessionList::GetInstance()->SessionInsert(session);
+	printf("Listen Insert: %I64u\n", session->GetSessionID());
     bufferevent_setcb(bev, net->readcb, net->writecb, Event_Cb, session);
     bufferevent_enable(bev, EV_READ | EV_WRITE);
 

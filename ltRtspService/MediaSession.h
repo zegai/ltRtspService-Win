@@ -9,12 +9,23 @@
 /************************************************************************/
 typedef long long INT64;
 class MediaSessionList;
+
+typedef struct _SessionInfo
+{
+	 uint64_t sessionid;
+	 MediaType type;
+	 rtsp_type stype;
+	 
+}SessionInfo;
+
+
 class MediaSession
 {
 public:
 	
     static void Send(struct bufferevent*, void *arg);
     static void Recv(struct bufferevent*, void *arg);
+
 	static long long GenSessionID();
 
 	uint64_t GetSessionID()const;
@@ -32,12 +43,10 @@ protected:
 	rtsp_string rs;
 private:
 	Network *work;
-    INT64 sessionid;
+    bool IsFullInit;
 	std::string rtspinc;
 	media_stream_ptr streamobj;
-	MediaType type;
-	rtsp_type stype;
-	bool IsFullInit;
+	SessionInfo info;
 	
 };
 
@@ -55,5 +64,5 @@ protected:
 	//CRITICAL_SECTION ListLock; ≤Â»Î…æ≥˝À¯
 	MediaSessionList();
 	~MediaSessionList();
-	map<uint64_t,  MediaSession*> SessionList;
+	map<uint64_t,  MediaSession *> SessionList;
 };

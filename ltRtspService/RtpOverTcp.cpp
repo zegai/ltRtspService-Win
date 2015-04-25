@@ -15,7 +15,7 @@ RtpOverTcp::TCPForH264(media_stream_ptr st)
 		buf_share_ptr bufget = HardwareIO::GetInstance()->GetBufferFormFile(st->fileindex, st->filepos, 10240);
 		if (bufget->GetMtuValue() == 10240)
 		{
-			printf("st.pos: %d\n", st->filepos);
+			//printf("st.pos: %d\n", st->filepos);
 			//获取数据之后继续分解成NAL单元
 			Media->DevNode(bufget, 0);
 			node = Media->GetNode();
@@ -130,14 +130,14 @@ RtpOverTcp::TCPForH264(media_stream_ptr st)
 		{
 			//计算关键帧时间戳
 			timestamp = Media->frame_count*90000*2*Media->StreamSps->num_units_in_tick / Media->StreamSps->time_scale;
-			printf("I Frame timestamp = %u Frame Count= %u\n", timestamp, Media->frame_count);
+			//printf("I Frame timestamp = %u Frame Count= %u\n", timestamp, Media->frame_count);
 			framefinal = true;
 		}
 		else
 		{
 			//同一关键帧内，根据P B帧的顺序计算时间戳
 			timestamp = (Media->frame_count*2 + Media->CurSlice->i_pic_order_cnt_lsb)*90000*Media->StreamSps->num_units_in_tick / Media->StreamSps->time_scale;
-			printf("P OR B Frame lsb = %d %d %d\n", Media->CurSlice->i_pic_order_cnt_lsb, Media->frame_count,timestamp);
+			//printf("P OR B Frame lsb = %d %d %d\n", Media->CurSlice->i_pic_order_cnt_lsb, Media->frame_count,timestamp);
 		}
 		if (framefinal)
 		{
@@ -149,7 +149,7 @@ RtpOverTcp::TCPForH264(media_stream_ptr st)
 		node->SetByte(timestamp >> 16 & 0xff, 9);
 		node->SetByte(timestamp >> 8  & 0xff, 10);
 		node->SetByte(timestamp & 0xff, 11);
-		printf("time Stamp = %d %d %d\n", timestamp, Media->CurSlice->i_pic_order_cnt_lsb, Media->frame_count);
+		//printf("time Stamp = %d %d %d\n", timestamp, Media->CurSlice->i_pic_order_cnt_lsb, Media->frame_count);
 		//设置SSRC
 		node->SetByte(Media->ssrc >> 24 & 0xff, 12);
 		node->SetByte(Media->ssrc >> 16 & 0xff, 13);

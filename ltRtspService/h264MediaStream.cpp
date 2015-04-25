@@ -2,18 +2,17 @@
 #include "h264MediaStream.h"
 #include "BaseEncoder.h"
 
-h264MediaStream::h264MediaStream()
+h264MediaStream::h264MediaStream():DevCount(0),StreamSps(NULL),
+	CurSlice(NULL),CurNalType(NULL)
 {
-	DevCount = 0;
-	StreamSps = NULL;
-	CurSlice = NULL;
-	CurNalType = NULL;
+
 }
 
 h264MediaStream::~h264MediaStream()
 {
 	printf("Release H264 Buffer\n");
 	delete StreamSps;
+	delete CurSlice;
 }
 
 bool 
