@@ -21,7 +21,11 @@ HardwareIO::HardwareIO()
 
 HardwareIO::~HardwareIO()
 {
-
+	map<int, FileNode*>::iterator it = FileManager.begin();
+	while (it != FileManager.end())
+	{
+		delete it->second;
+	}
 }
 
 

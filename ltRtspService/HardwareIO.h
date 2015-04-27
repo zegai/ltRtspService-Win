@@ -13,6 +13,7 @@ protected:
 		std::string _filename;
 		FILE*  _filefd;
 		uint64_t _curpos;
+		~_FileNode(){fclose(_filefd);}
 	}FileNode;
 	
 	HardwareIO();

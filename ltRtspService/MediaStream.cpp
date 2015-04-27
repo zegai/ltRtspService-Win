@@ -7,15 +7,20 @@ MediaStream::MediaStream()
 	filepos = 0;
 	OnStream = false;
 	sqsnumber = 0;
-	frame_count = 0;
-	lsb_count = 0;
-	pframe_count = 0;
+	MediaInfo.frame_count = 0;
+	MediaInfo.lsb_count = 0;
+	MediaInfo.pframe_count = 0;
 	IsPlay = false;
 }
 
 MediaStream::~MediaStream()
 {
-
+	while (bufferlist.size())
+	{
+		Buffer* buf = bufferlist.front();
+		bufferlist.pop();
+		delete buf;
+	}
 }
 
 void 

@@ -24,6 +24,7 @@ Buffer::Buffer(const Buffer& ibuffer)
 
 Buffer::~Buffer()
 {
+	//printf("Buffer Del\n");
 	delete[] pbuffer;
 };
 

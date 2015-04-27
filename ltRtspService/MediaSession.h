@@ -51,8 +51,6 @@ private:
 };
 
 
-//´ıÍêÉÆ 
-
 class MediaSessionList
 {
 public:

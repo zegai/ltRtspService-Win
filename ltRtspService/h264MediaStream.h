@@ -97,7 +97,7 @@ public:
 	h264_sps_t* StreamSps;
 	h264_slice_t* CurSlice;
 
-	unsigned short CurNalType;
+	unsigned char CurNalType;
 	unsigned short poc;
 
 

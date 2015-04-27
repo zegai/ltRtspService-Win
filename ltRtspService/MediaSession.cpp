@@ -83,6 +83,10 @@ MediaSession::DealRtsp(struct bufferevent* bev)
     if(bev && bufferevent_read(bev, pstring, 1480))
     {
         //printf("Get New Node:\n%s\n", pstring);
+		if (pstring[0] == '$')
+		{
+			return ;
+		}
         rtspinc.append(pstring);
         if ( rtspinc.find("\r\n\r\n") != std::string::npos )
         {
@@ -100,8 +104,8 @@ MediaSession::DealRtsp(struct bufferevent* bev)
 			else if (info.stype == SETUP)
 			{
 				streamobj = MediaStreamBuild::CreateNew(".h264", info.type);
-				streamobj->filename = "\\test.h264";
-				streamobj->fileindex =  HardwareIO::GetInstance()->MakeFileNode(streamobj->filename);
+				streamobj->MediaInfo.filename = "\\test.h264";
+				streamobj->fileindex =  HardwareIO::GetInstance()->MakeFileNode(streamobj->MediaInfo.filename);
 				buf_share_ptr filebuf = HardwareIO::GetInstance()->GetBufferFormFile(streamobj->fileindex, streamobj->filepos, 10240);
 				streamobj->DevNode(filebuf, 0);
 				bufferevent_write( bev, rtspinc.c_str(), rtspinc.size() );
@@ -145,7 +149,7 @@ void
 MediaSession::Send(struct bufferevent* bev, void *arg)
 {
     MediaSession *session = (MediaSession *)arg;
- 
+	
 	if (session->IsPlay() == true && session->streamobj->IsPlay == true)
 	{
 		buf_share_ptr pt = RtpOverTcp::TCPForH264(session->streamobj);
@@ -156,11 +160,11 @@ MediaSession::Send(struct bufferevent* bev, void *arg)
 			//还未判断文件结尾
 		}
 		//暂时在此使用延时，以后可用libevent的定时器
-		while (GetTickCount() - session->tick < session->streamobj->frame_count*1000*2*session->streamobj->fps);
+		while (GetTickCount() - session->tick < session->streamobj->MediaInfo.frame_count*1000*2*session->streamobj->MediaInfo.fps);
 		{
 			Sleep(10);
 		}
-		
+		//Sleep(360);
 		
 		bufferevent_write( bev, pt->GetBuffer(), pt->GetSizeValue());
 	}
@@ -222,7 +226,7 @@ bool MediaSessionList::SessionInsert(MediaSession* Session)
 MediaSession* MediaSessionList::SessionGet(uint64_t SessionID)
 {
 	MediaSession* ret = SessionList[SessionID];
-	printf("Del Session: %I64u\n", SessionID);
+	//printf("Del Session: %I64u\n", SessionID);
 	if (!ret->IsFullInit)
 	{
 		SessionList.erase(SessionID);
@@ -239,6 +243,7 @@ bool MediaSessionList::SessionDel(uint64_t SessionID)
 	if (getsession)
 	{
 		delete getsession;
+		SessionList.erase(SessionID);
 		return true;
 	}
 	return false;

@@ -28,6 +28,7 @@ MediaCreateSdp::~MediaCreateSdp()
 	{
 		string *key = static_cast<string *>(iter->first);
 		string *svalue = static_cast<string *>(iter->second);
+		
 		delete key;
 		delete svalue;
 		iter ++;

@@ -29,11 +29,11 @@
 #include <queue>
 #include <boost/shared_ptr.hpp>
 //#include "RtspString.h"
-
+#include <vld.h>
 
 int _tmain(int argc, _TCHAR* argv[])
 {
-
+	//
 #ifdef WIN32
 	WSADATA wsa_data;
 	WSAStartup(0x0202, &wsa_data);
@@ -50,5 +50,6 @@ int _tmain(int argc, _TCHAR* argv[])
 	Network* work = new Network(sa);
 	work->NetPrepare(TCP);
 	work->StartServer(MediaSession::Recv, MediaSession::Send);
+	//_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF|_CRTDBG_LEAK_CHECK_DF);
 	return 0;
 }

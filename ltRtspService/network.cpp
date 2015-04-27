@@ -133,6 +133,7 @@ Network::Event_Cb(struct bufferevent *bev, short events, void *user_data)
 	//回收当前MediaSession会话信息资源
     MediaSession * ses = (MediaSession *)user_data;
     MediaSessionList::GetInstance()->SessionDel(ses->GetSessionID());
+	//bufferevent_free(bev);
 }
 
 //void
