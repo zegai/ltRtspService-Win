@@ -1,15 +1,27 @@
 #include "stdafx.h"
 #include "MediaBuffer.h"
 
+netbufferpoll* netbufferpoll::single = new netbufferpoll;
 
-Buffer::Buffer(unsigned mtu /* = 1480 */)
+Buffer::Buffer(unsigned mtu /* = 1480 */, buftype buft)
 {
-	MTU = mtu;
-	pbuffer = new unsigned char[mtu];
+	if (buft == NORMAL)
+	{
+		MTU = mtu;
+		pbuffer = new unsigned char[mtu];
 
-	memset(pbuffer, 0, mtu);
+		memset(pbuffer, 0, mtu);
+
+		pos = mtu;
+	}
+	else if(buft == NETBUFPOLL)
+	{
+		 MTU = 1480;
+		 pos = 1480;
+		 pbuffer = netbufferpoll::get_instance()->get_buf();
+	}
 	
-	pos = mtu;
+	
 }
 
 Buffer::Buffer(const Buffer& ibuffer)
